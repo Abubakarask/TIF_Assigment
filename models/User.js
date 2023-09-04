@@ -4,14 +4,14 @@ const jwt = require("jsonwebtoken");
 const crypto = require("crypto");
 
 const userSchema = new mongoose.Schema({
-  name: {
+  id: {
     type: String,
-    required: [true, "Please enter a name"],
+    require: true,
   },
 
-  avatar: {
-    public_id: String,
-    url: String,
+  name: {
+    type: String,
+    default: null,
   },
 
   email: {
@@ -26,25 +26,10 @@ const userSchema = new mongoose.Schema({
     select: false,
   },
 
-  posts: [
-    {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Post",
-    },
-  ],
-  followers: [
-    {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
-    },
-  ],
-
-  following: [
-    {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
-    },
-  ],
+  created_at: {
+    type: Date,
+    default: Date.now,
+  },
 
   resetPasswordToken: String,
   resetPasswordExpire: Date,

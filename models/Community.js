@@ -1,41 +1,29 @@
 const mongoose = require("mongoose");
 
-const postSchema = new mongoose.Schema({
-  caption: String,
+const communitySchema = new mongoose.Schema({
+  id: { type: String, require: true },
 
-  image: {
-    public_id: String,
-    url: String,
+  name: {
+    type: String,
+    default: null,
   },
 
-  owner: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "User",
+  slug: {
+    type: String,
+    unique: true,
   },
 
-  createdAt: {
+  owner: { type: String, ref: "User" },
+
+  created_at: {
     type: Date,
     default: Date.now,
   },
-  likes: [
-    {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
-    },
-  ],
 
-  comments: [
-    {
-      user: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "User",
-      },
-      comment: {
-        type: String,
-        required: true,
-      },
-    },
-  ],
+  updated_at: {
+    type: Date,
+    default: null,
+  },
 });
 
-module.exports = mongoose.model("Post", postSchema);
+module.exports = mongoose.model("Community", communitySchema);
