@@ -1,22 +1,24 @@
-const User = require("../models/User");
 const jwt = require("jsonwebtoken");
+const { User } = require("../models/User");
 
 exports.isAuthenticated = async (req, res, next) => {
   try {
-    const { token } = req.cookies;
+    // console.log(req.cookies);
+    const { access_token } = req.cookies;
 
-    if (!token) {
+    if (!access_token) {
       return res.status(401).json({
         message: "Please login first",
       });
     }
 
-    const decoded = await jwt.verify(token, process.env.JWT_SECRET);
+    const decoded = await jwt.verify(access_token, process.env.JWT_SECRET);
 
-    req.user = await User.findById(decoded._id);
+    req.user = await User.findOne({ id: decoded.id });
 
     next();
   } catch (error) {
+    console.log(error);
     res.status(500).json({
       message: error.message,
     });

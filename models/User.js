@@ -6,7 +6,7 @@ const crypto = require("crypto");
 const userSchema = new mongoose.Schema({
   id: {
     type: String,
-    require: true,
+    required: true,
   },
 
   name: {
@@ -16,13 +16,10 @@ const userSchema = new mongoose.Schema({
 
   email: {
     type: String,
-    required: [true, "Please enter an email"],
     unique: [true, "Email already exists"],
   },
   password: {
     type: String,
-    required: [true, "Please enter a password"],
-    minlength: [6, "Password must be at least 6 characters"],
     select: false,
   },
 
@@ -48,7 +45,8 @@ userSchema.methods.matchPassword = async function (password) {
 };
 
 userSchema.methods.generateToken = function () {
-  return jwt.sign({ _id: this._id }, process.env.JWT_SECRET);
+  console.log("here");
+  return jwt.sign({ id: this.id }, process.env.JWT_SECRET);
 };
 
 userSchema.methods.getResetPasswordToken = function () {
@@ -63,4 +61,5 @@ userSchema.methods.getResetPasswordToken = function () {
   return resetToken;
 };
 
-module.exports = mongoose.model("User", userSchema);
+const User = mongoose.model("User", userSchema);
+module.exports = { User };

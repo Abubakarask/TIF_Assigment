@@ -26,4 +26,5 @@ const communitySchema = new mongoose.Schema({
   },
 });
 
-module.exports = mongoose.model("Community", communitySchema);
+const Community = mongoose.model("Community", communitySchema);
+module.exports = { Community };
