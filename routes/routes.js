@@ -23,8 +23,8 @@ router.route("/role").post(createRole).get(getAllRoles);
 //User APIs
 router.route("/auth/signup").post(signupValidationRules, signup);
 router.route("/auth/signin").post(signinValidationRules, signin);
-router.route("/auth/me").post(isAuthenticated, myProfile);
-router.route("/auth/signout").post(isAuthenticated, signout);
+router.route("/auth/me").get(isAuthenticated, myProfile);
+router.route("/auth/signout").get(isAuthenticated, signout);
 
 //Community APIs
 router
