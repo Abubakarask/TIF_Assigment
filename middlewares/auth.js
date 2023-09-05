@@ -13,8 +13,8 @@ exports.isAuthenticated = async (req, res, next) => {
     }
 
     const decoded = await jwt.verify(access_token, process.env.JWT_SECRET);
-
-    req.user = await User.findOne({ id: decoded.id });
+    // console.log(decoded);
+    req.user = await User.findOne({ _id: decoded._id });
 
     next();
   } catch (error) {

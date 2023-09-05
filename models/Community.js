@@ -1,7 +1,7 @@
 const mongoose = require("mongoose");
 
 const communitySchema = new mongoose.Schema({
-  id: { type: String, require: true },
+  _id: { type: String, required: true },
 
   name: {
     type: String,
@@ -22,7 +22,7 @@ const communitySchema = new mongoose.Schema({
 
   updated_at: {
     type: Date,
-    default: null,
+    default: Date.now,
   },
 });
 

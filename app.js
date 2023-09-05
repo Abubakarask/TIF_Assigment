@@ -15,5 +15,4 @@ const routes = require("./routes/routes");
 
 // Using Routes
 app.use("/api/v1", routes);
-
 module.exports = app;

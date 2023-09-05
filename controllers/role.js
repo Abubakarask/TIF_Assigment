@@ -5,7 +5,7 @@ const { generateSnowflakeId } = require("../utils/generateID");
 exports.createRole = async (req, res) => {
   try {
     const { name } = req.body;
-    let roleExists = await Role.find({ name });
+    let roleExists = await Role.findOne({ name });
 
     if (roleExists) {
       return res.status(400).json({
@@ -18,7 +18,7 @@ exports.createRole = async (req, res) => {
       });
     }
     const role = new Role({ name });
-    role.id = await generateSnowflakeId();
+    role._id = await generateSnowflakeId();
     await role.save();
 
     // Use .lean() to return a plain JavaScript object without __v and _id

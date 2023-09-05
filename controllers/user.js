@@ -38,10 +38,10 @@ exports.signup = async (req, res) => {
       });
     }
 
-    const id = await generateSnowflakeId();
+    const _id = await generateSnowflakeId();
 
     user = await new User({
-      id,
+      _id,
       name,
       email,
       password,
@@ -63,7 +63,7 @@ exports.signup = async (req, res) => {
         success: true,
         content: {
           data: {
-            id: user.id,
+            _id: user._id,
             name: user.name,
             email: user.email,
             created_at: user.created_at,
@@ -128,7 +128,7 @@ exports.signin = async (req, res) => {
         success: true,
         content: {
           data: {
-            id: user.id,
+            _id: user._id,
             name: user.name,
             email: user.email,
             created_at: user.created_at,
@@ -146,7 +146,7 @@ exports.signin = async (req, res) => {
 
 exports.myProfile = async (req, res) => {
   try {
-    const user = await User.findOne({ id: req.user.id }, { _id: 0, __v: 0 });
+    const user = await User.findOne({ _id: req.user._id }, { _id: 0, __v: 0 });
 
     res.status(200).json({
       success: true,
