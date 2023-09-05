@@ -9,5 +9,4 @@
                           - MONGO_URI
                           - JWT_SECRET 
 
-## Step2 -->  After Having the Libraries and Environmenttal Variables the Project is good to go,
-## Use ```npm run start``` or `nodemon server.js` to run the project.
+## Step2 -->  After Having the Libraries and Environmenttal Variables the Project is good to go, Use ```npm run start``` or `nodemon server.js` to run the project.
