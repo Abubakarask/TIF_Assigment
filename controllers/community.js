@@ -6,7 +6,7 @@ const { generateSnowflakeId, generateSlug } = require("../utils/generateID");
 exports.createCommunity = async (req, res) => {
   try {
     // user _id from the authenticated user
-    console.log(req.user);
+    // console.log(req.user);
     const ownerId = req.user._id;
 
     // get community name from payload
@@ -18,7 +18,7 @@ exports.createCommunity = async (req, res) => {
     if (communityWithSlugExists) {
       return res.status(400).json({
         success: false,
-        message: "Community with this name already exists",
+        message: "Community with this name/slug already exists",
         code: "ALREADY_EXIST",
       });
     }
@@ -32,7 +32,7 @@ exports.createCommunity = async (req, res) => {
       owner: ownerId,
     });
 
-    //Add owner(first member as Community Admin)
+    //Add owner/logged_in user(first member as Community Admin)
     let roleDetails = await Role.findOne({ name: "Community Admin" });
     let memberId = await generateSnowflakeId();
 
@@ -76,13 +76,13 @@ exports.getAllCommunities = async (req, res) => {
     const skip = (page - 1) * perPage;
     const limit = perPage;
 
-    //Communities with Pagination
+    //Communities wrt Pagination, also populated owner details
     const allCommunities = await Community.find({}, { __v: 0 })
       .skip(skip)
       .limit(limit)
       .populate({
         path: "owner",
-        select: "name", // Only select the name field from the owner
+        select: "_id name",
       });
 
     const totalCommunities = await Community.countDocuments();

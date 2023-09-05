@@ -13,6 +13,8 @@ const {
   getOwnedCommunity,
   getMyJoinedCommunity,
 } = require("../controllers/community");
+const { route } = require("../app");
+const { addMember, deleteMember } = require("../controllers/member");
 const router = express.Router();
 
 //Role APIs
@@ -34,5 +36,11 @@ router
   .get(isAuthenticated, getCommunityMembers);
 router.route("/community/me/owner").get(isAuthenticated, getOwnedCommunity);
 router.route("/community/me/member").get(isAuthenticated, getMyJoinedCommunity);
+
+// Member APIs
+router.route("/member").post(isAuthenticated, addMember);
+router
+  .route("/member/:memberid/:communityid")
+  .delete(isAuthenticated, deleteMember);
 
 module.exports = router;

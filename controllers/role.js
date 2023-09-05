@@ -1,4 +1,3 @@
-const { handleDuplicateKeyError } = require("../middlewares/errorHandler");
 const { Role } = require("../models/Role");
 const { generateSnowflakeId } = require("../utils/generateID");
 
@@ -24,7 +23,7 @@ exports.createRole = async (req, res) => {
     // Use .lean() to return a plain JavaScript object without __v and _id
     const result = await Role.findById(role._id).lean();
 
-    res.status(201).json({
+    res.status(200).json({
       status: true,
       content: {
         data: result,
@@ -41,8 +40,8 @@ exports.createRole = async (req, res) => {
 exports.getAllRoles = async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1;
-    //defining no of entries per page
-    const perPage = 50;
+    //no of entries per page
+    const perPage = 10;
 
     //fetching entries and handling the pagination part(using skip for skipping the entries which we in previous pages)
     const roles = await Role.find({}, { _id: 0, __v: 0 })

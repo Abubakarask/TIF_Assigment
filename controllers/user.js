@@ -1,27 +1,9 @@
 const { User } = require("../models/User");
-const { validationResult } = require("express-validator");
 const { generateSnowflakeId } = require("../utils/generateID");
 const { signupValidationRules } = require("../utils/validation");
 
 exports.signup = async (req, res) => {
   try {
-    const errors = await validationResult(req);
-    // console.log(errors);
-    if (!errors.isEmpty()) {
-      // Create an errors array in the desired format
-      const validationErrors = errors.array().map((error) => ({
-        param: error.path,
-        message: error.msg,
-        code: "INVALID_INPUT",
-      }));
-
-      return res.status(400).json({
-        status: false,
-        errors: validationErrors,
-      });
-    }
-
-    //if no errors then this part exceutes
     const { name, email, password } = req.body;
     let user = await User.findOne({ email });
 
@@ -40,7 +22,7 @@ exports.signup = async (req, res) => {
 
     const _id = await generateSnowflakeId();
 
-    user = await new User({
+    user = new User({
       _id,
       name,
       email,
@@ -48,7 +30,7 @@ exports.signup = async (req, res) => {
     });
 
     const token = await user.generateToken();
-    console.log(token, "tok");
+    // console.log(token, "tok");
 
     const options = {
       expires: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000),
@@ -93,7 +75,7 @@ exports.signin = async (req, res) => {
           {
             param: "email",
             message: "User does not exist",
-            code: "ALREADY_EXIST",
+            code: "DO_NOT_EXIST",
           },
         ],
       });
@@ -146,7 +128,7 @@ exports.signin = async (req, res) => {
 
 exports.myProfile = async (req, res) => {
   try {
-    const user = await User.findOne({ _id: req.user._id }, { _id: 0, __v: 0 });
+    const user = await User.findOne({ _id: req.user._id }, { __v: 0 });
 
     res.status(200).json({
       success: true,
