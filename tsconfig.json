@@ -7,7 +7,6 @@
     "moduleResolution": "node",
     "baseUrl": ".",
     "typeRoots": ["./node_modules/@types", "./types"],
-    "types": ["node", "mongoose"],
     "resolveJsonModule": true,
     "outDir": "./",
     "noEmit": false,
@@ -29,5 +28,6 @@
       "@services/*": ["services/v1/*"],
       "@universe/*": ["universe/*"]
     }
-  }
+  },
+  "include": ["server.ts"]
 }

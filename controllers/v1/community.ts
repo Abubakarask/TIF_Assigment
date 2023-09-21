@@ -1,8 +1,5 @@
 import express, { Request, Response } from "express";
-import { Community } from "../../models/Community";
 import { generateSlug } from "../../universe/v1/libraries/helper";
-import { Role } from "../../models/Role";
-import { Member } from "../../models/Member";
 import CommunityService from "../../services/v1/community";
 import RoleService from "../../services/v1/role";
 import MemberService from "../../services/v1/member";
@@ -21,7 +18,9 @@ class communityController {
 
       const slug = await generateSlug(name);
 
-      const communityWithSlugExists = await CommunityService.communityExists();
+      const communityWithSlugExists = await CommunityService.communityExists(
+        slug
+      );
       if (communityWithSlugExists) {
         return res.status(400).json({
           success: false,
@@ -39,11 +38,13 @@ class communityController {
       //Add owner/logged_in user(first member as Community Admin)
       let roleDetails = await RoleService.findRoleDtls("Community Admin");
 
-      let firstMember = await MemberService.createMember(
-        community._id,
-        ownerId,
-        roleDetails._id
-      );
+      if (roleDetails) {
+        let firstMember = await MemberService.createMember(
+          community._id,
+          ownerId,
+          roleDetails._id
+        );
+      }
 
       res.status(200).json({
         status: true,
