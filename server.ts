@@ -16,7 +16,7 @@ const server = async (): Promise<express.Application> => {
   //Loaders
   Env.Loader();
   Logger.Loader();
-  await Cache.Loader();
+  // await Cache.Loader();
   await Database.Loader();
   FrameworkLoader(app);
 
