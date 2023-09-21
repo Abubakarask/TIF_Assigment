@@ -1,6 +1,9 @@
 import { Request, Response, NextFunction } from "express";
 import jwt from "jsonwebtoken";
-import { User } from "../../models/User";
+import UserService from "../../services/v1/user";
+import { DataStoredInToken } from "../../interfaces/v1/user";
+import { ObjectId } from "mongodb";
+import Logger from "../../universe/v1/libraries/logger";
 
 export const isAuthenticated = async (
   req: Request,
@@ -17,18 +20,21 @@ export const isAuthenticated = async (
       });
     }
 
-    const decoded = await jwt.verify(
+    const decoded: any = jwt.verify(
       access_token,
       process.env.JWT_SECRET as string
     );
 
-    // console.log(decoded);
-    req.user = await User.findOne({ _id: decoded._id });
+    console.log(decoded, typeof decoded._id);
+
+    // Retrieve the user from the database based on the ObjectId
+    req.user = await UserService.getUserById(new ObjectId(decoded._id));
+
     next();
-  } catch (error) {
-    console.error(error);
+  } catch (err) {
+    Logger.instance.error(err);
     res.status(500).json({
-      message: error.message,
+      message: err.message,
     });
   }
 };

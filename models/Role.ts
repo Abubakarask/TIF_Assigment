@@ -3,7 +3,6 @@ import { IRole } from "../interfaces/v1/role";
 
 const roleSchema: Schema<IRole> = new Schema<IRole>(
   {
-    _id: { type: String, required: true },
     name: { type: String, unique: true },
   },
   { timestamps: true }

@@ -1,15 +1,16 @@
 import { Request, Response } from "express";
-import { User } from "../../models/User";
-import { generateSnowflakeId } from "../../universe/v1/libraries/helper";
 import bcrypt from "bcrypt";
+import UserService from "../../services/v1/user";
+import generateToken from "../../universe/v1/libraries/token";
+import Logger from "../../universe/v1/libraries/logger";
 
 class UserController {
   static async signup(req: Request, res: Response) {
     try {
       const { name, email, password } = req.body;
-      let user = await User.findOne({ email });
+      let userExists = await UserService.userExists(email);
 
-      if (user) {
+      if (userExists) {
         return res.status(400).json({
           status: false,
           errors: [
@@ -22,23 +23,15 @@ class UserController {
         });
       }
 
-      const _id = await generateSnowflakeId();
+      let user = await UserService.createUser(name, email, password);
 
-      user = new User({
-        _id,
-        name,
-        email,
-        password,
-      });
-
-      const token = await user.generateToken();
+      const token = await generateToken(user._id);
 
       const options = {
         expires: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000),
         httpOnly: true,
       };
 
-      await user.save();
       res
         .status(200)
         .cookie("access_token", token, options)
@@ -54,11 +47,11 @@ class UserController {
             meta: { access_token: token },
           },
         });
-    } catch (error) {
-      console.error(error);
+    } catch (err) {
+      Logger.instance.error(err);
       res.status(500).json({
         success: false,
-        message: error.message,
+        message: err.message,
       });
     }
   }
@@ -67,7 +60,7 @@ class UserController {
     try {
       const { email, password } = req.body;
 
-      const user = await User.findOne({ email });
+      const user = await UserService.userExists(email);
 
       if (!user) {
         return res.status(400).json({
@@ -97,7 +90,7 @@ class UserController {
         });
       }
 
-      const token = await user.generateToken();
+      const token = await generateToken(user._id);
 
       const options = {
         expires: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000),
@@ -114,32 +107,40 @@ class UserController {
               _id: user._id,
               name: user.name,
               email: user.email,
-              created_at: user.created_at,
+              createdAt: user.createdAt,
             },
             meta: { access_token: token },
           },
         });
-    } catch (error) {
+    } catch (err) {
+      Logger.instance.error(err);
       res.status(500).json({
         success: false,
-        message: error.message,
+        message: err.message,
       });
     }
   }
 
   static async myProfile(req: Request, res: Response) {
     try {
-      const user = await User.findOne({ _id: req.user._id }, { __v: 0 });
+      const user = await UserService.getUserById(req.user._id);
 
       res.status(200).json({
         success: true,
-        content: { data: user },
+        content: {
+          data: {
+            _id: user?._id,
+            name: user?.name,
+            email: user?.email,
+            createdAt: user?.createdAt,
+          },
+        },
       });
-    } catch (error) {
-      console.error(error);
+    } catch (err) {
+      Logger.instance.error(err);
       res.status(500).json({
         success: false,
-        message: error.message,
+        message: err.message,
       });
     }
   }
@@ -156,10 +157,11 @@ class UserController {
           success: true,
           message: "Logged Out",
         });
-    } catch (error) {
-      return res.status(500).json({
+    } catch (err) {
+      Logger.instance.error(err);
+      res.status(500).json({
         success: false,
-        message: error.message,
+        message: err.message,
       });
     }
   }

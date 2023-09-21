@@ -1,9 +1,10 @@
 import express, { Request, Response } from "express";
-import { Member } from "../../models/Member";
-import { Community } from "../../models/Community";
-import { Role } from "../../models/Role";
-import { User } from "../../models/User";
-import { generateSnowflakeId } from "../../universe/v1/libraries/helper";
+import MemberService from "../../services/v1/member";
+import RoleService from "../../services/v1/role";
+import CommunityService from "../../services/v1/community";
+import { ObjectId } from "mongodb";
+import UserService from "../../services/v1/user";
+import Logger from "../../universe/v1/libraries/logger";
 
 class memberController {
   static async addMember(req: Request, res: Response) {
@@ -12,7 +13,7 @@ class memberController {
       const { community, user, role } = req.body;
 
       //check if member exists in community, if exists send error
-      let memberExists = await Member.findOne({ user, community });
+      let memberExists = await MemberService.memberExists(user, community);
       if (memberExists) {
         return res.status(400).json({
           status: false,
@@ -26,9 +27,11 @@ class memberController {
       }
 
       //check if the payload attributes are present in respective communities, if not send error
-      const communityExists = await Community.findById(community);
-      const userExists = await User.findById(user);
-      const roleExists = await Role.findById(role);
+      const communityExists = await CommunityService.getCommunityById(
+        new ObjectId(community)
+      );
+      const userExists = await UserService.getUserById(new ObjectId(user));
+      const roleExists = await RoleService.getRoleById(new ObjectId(role));
 
       if (!communityExists) {
         return res.status(400).json({
@@ -70,17 +73,18 @@ class memberController {
       }
 
       //get details for Community Admin
-      const AdminDtls = await Role.findOne({ name: "Community Admin" });
-
-      //check if user is community admin(of community given in payload)
-      const communityAdmin = await Member.find({
-        role: AdminDtls._id,
-        community,
-        user: userId,
-      });
-
+      let AdminDtls = await RoleService.findRoleDtls("Community Admin");
+      let communityAdmin: any;
+      if (AdminDtls) {
+        //check if user is community admin(of community given in payload)
+        communityAdmin = await MemberService.ifCommunityAdmin(
+          AdminDtls._id,
+          new ObjectId(community),
+          userId
+        );
+      }
       if (!communityAdmin) {
-        return res.status(40).json({
+        return res.status(401).json({
           status: false,
           errors: [
             {
@@ -92,25 +96,21 @@ class memberController {
       }
 
       // Create a new member
-      const _id = await generateSnowflakeId();
-      const member = new Member({
-        _id,
-        community,
-        user,
-        role,
-      });
-
-      await member.save();
+      const member = await MemberService.createMember(
+        new ObjectId(community),
+        userId,
+        new ObjectId(role)
+      );
 
       res.status(200).json({
         status: true,
         content: {
           data: {
-            _id: member._id,
-            community: member.community,
-            user: member.user,
-            role: member.role,
-            created_at: member.created_at,
+            _id: member?._id,
+            community: member?.community,
+            user: member?.user,
+            role: member?.role,
+            created_at: member?.created_at,
           },
         },
       });
@@ -126,15 +126,19 @@ class memberController {
   static async deleteMember(req: Request, res: Response) {
     try {
       const userId = req.user._id;
-      const { memberid, communityid } = req.params;
+      const { member, community } = req.params;
+      let memberObjectId = new ObjectId(member);
+      let communityObjectId = new ObjectId(community);
+      console.log(memberObjectId, communityObjectId);
 
-      //check if member exists in community, if not exists send error
-      let member = await Member.findOne({
-        user: memberid,
-        community: communityid,
-      });
+      let memberExists = await MemberService.memberExists(
+        new ObjectId(member),
+        new ObjectId(community)
+      );
 
-      if (!member) {
+      Logger.instance.info(memberExists);
+
+      if (!memberExists) {
         return res.status(400).json({
           status: false,
           errors: [
@@ -147,15 +151,16 @@ class memberController {
       }
 
       //get details for Community Admin and Moderator
-      const AdminDtls = await Role.findOne({ name: "Community Admin" });
-      const modrtrDtls = await Role.findOne({ name: "Community Moderator" });
+      const AdminDtls = await RoleService.findRoleDtls("Community Admin");
+      const modrtrDtls = await RoleService.findRoleDtls("Community Moderator");
 
       //check if user is community admin or moderator(of community given in payload)
-      const communityAccess = await Member.findOne({
-        community: communityid,
-        user: userId,
-        $or: [{ role: AdminDtls._id }, { role: modrtrDtls._id }],
-      });
+      const communityAccess = await MemberService.ifCommunityAccess(
+        communityObjectId,
+        userId,
+        AdminDtls?._id,
+        modrtrDtls?._id
+      );
 
       // console.log(communityAccess, communityid, userId);
 
@@ -171,10 +176,7 @@ class memberController {
         });
       }
 
-      await Member.deleteOne({
-        user: memberid,
-        community: communityid,
-      });
+      await MemberService.deleteMember(member, community);
 
       res.status(200).json({
         status: true,
@@ -183,7 +185,7 @@ class memberController {
       console.error(error);
       res.status(500).json({
         status: false,
-        message: "Failed to add a member to the community.",
+        message: "Failed to delete a member to the community.",
       });
     }
   }

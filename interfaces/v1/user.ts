@@ -1,9 +1,12 @@
-import { Document } from "mongoose";
+import { Document, Types } from "mongoose";
 
 export interface IUser extends Document {
-  _id: string;
-  name: string | null;
+  name: string;
   email: string;
   password: string;
-  created_at: Date;
+  createdAt: Number;
+}
+
+export interface DataStoredInToken {
+  _id: Types.ObjectId;
 }

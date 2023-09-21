@@ -1,9 +1,9 @@
-import { Document } from "mongoose";
+import { Document, Types } from "mongoose";
 
 export interface ICommunity extends Document {
-  name: string | null;
+  name: string;
   slug: string;
-  owner: string;
-  created_at?: Date;
-  updated_at?: Date;
+  owner: Types.ObjectId;
+  createdAt?: number;
+  updatedAt?: number;
 }

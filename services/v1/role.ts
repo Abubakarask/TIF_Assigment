@@ -1,6 +1,7 @@
-import { ObjectId } from "mongoose";
+import { ObjectId } from "mongodb";
 import Database from "../../loaders/v1/database";
 import { collections } from "../../schema/v1/meta";
+import Logger from "../../universe/v1/libraries/logger";
 
 class RoleService {
   static async roleExists(name: string) {
@@ -9,9 +10,8 @@ class RoleService {
       .findOne({ name });
   }
 
-  static async createRole(name: string, roleId: string) {
+  static async createRole(name: string) {
     const roleDocument = {
-      _id: roleId,
       name,
       createdAt: Date.now(),
       updatedAt: Date.now(),
@@ -20,9 +20,21 @@ class RoleService {
     const result = await Database.instance
       .collection(collections.roles)
       .insertOne(roleDocument);
-    console.log("result", result);
+    Logger.instance.info("result", result);
 
-    return result;
+    // Use the insertedId to fetch the role document
+    if (result.insertedId) {
+      const insertedId = result.insertedId;
+      const createdRole = await Database.instance
+        .collection(collections.roles)
+        .findOne({ _id: insertedId });
+
+      if (createdRole) {
+        return createdRole;
+      }
+    }
+
+    throw new Error("Role creation failed or role not found");
   }
 
   static async getAll(page: number, perPage: number) {
@@ -37,6 +49,18 @@ class RoleService {
 
   static async getAllCount() {
     return Database.instance.collection(collections.roles).countDocuments();
+  }
+
+  static async findRoleDtls(name: string) {
+    return await Database.instance
+      .collection(collections.roles)
+      .findOne({ name });
+  }
+
+  static async getRoleById(_id: ObjectId) {
+    return await Database.instance
+      .collection(collections.roles)
+      .findOne({ _id });
   }
 }
 

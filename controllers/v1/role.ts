@@ -23,16 +23,12 @@ class RoleController {
         });
       }
 
-      const roleId = await generateSnowflakeId();
-      const role = await RoleService.createRole(name, roleId);
-
-      // // Use .lean() to return a plain JavaScript object without __v and _id
-      // const result = await Role.findById(role._id).lean();
+      const role = await RoleService.createRole(name);
 
       res.status(200).json({
         status: true,
         content: {
-          data: { name, _id: roleId },
+          data: role,
         },
       });
     } catch (error) {

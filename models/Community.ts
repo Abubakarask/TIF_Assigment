@@ -3,10 +3,9 @@ import { ICommunity } from "../interfaces/v1/community";
 
 const communitySchema: Schema<ICommunity> = new Schema<ICommunity>(
   {
-    _id: { type: String, required: true },
-    name: { type: String, default: null },
+    name: { type: String, required: true },
     slug: { type: String, unique: true },
-    owner: { type: String, ref: "User" },
+    owner: { type: Schema.Types.ObjectId, ref: "User" },
   },
   { timestamps: true }
 );

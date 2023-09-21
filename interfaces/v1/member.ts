@@ -1,9 +1,8 @@
-import { Document } from "mongoose";
+import { Document, Types } from "mongoose";
 
 export interface IMember extends Document {
-  _id: string;
-  community: string;
-  user: string;
-  role: string;
-  created_at?: Date;
+  community: Types.ObjectId;
+  user: Types.ObjectId;
+  role: Types.ObjectId;
+  createdAt?: number;
 }

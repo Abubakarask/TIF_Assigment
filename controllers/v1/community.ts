@@ -1,11 +1,13 @@
 import express, { Request, Response } from "express";
 import { Community } from "../../models/Community";
-import {
-  generateSlug,
-  generateSnowflakeId,
-} from "../../universe/v1/libraries/helper";
+import { generateSlug } from "../../universe/v1/libraries/helper";
 import { Role } from "../../models/Role";
 import { Member } from "../../models/Member";
+import CommunityService from "../../services/v1/community";
+import RoleService from "../../services/v1/role";
+import MemberService from "../../services/v1/member";
+import Logger from "../../universe/v1/libraries/logger";
+import { ObjectId } from "mongodb";
 
 class communityController {
   static async createCommunity(req: Request, res: Response) {
@@ -19,7 +21,7 @@ class communityController {
 
       const slug = await generateSlug(name);
 
-      const communityWithSlugExists = await Community.findOne({ slug });
+      const communityWithSlugExists = await CommunityService.communityExists();
       if (communityWithSlugExists) {
         return res.status(400).json({
           success: false,
@@ -28,27 +30,21 @@ class communityController {
         });
       }
 
-      //community ID
-      const _id = await generateSnowflakeId();
-      const community = new Community({
-        _id,
+      const community = await CommunityService.createCommunity(
         name,
         slug,
-        owner: ownerId,
-      });
+        ownerId
+      );
 
       //Add owner/logged_in user(first member as Community Admin)
-      let roleDetails = await Role.findOne({ name: "Community Admin" });
-      let memberId = await generateSnowflakeId();
+      let roleDetails = await RoleService.findRoleDtls("Community Admin");
 
-      await Member.create({
-        _id: memberId,
-        community: community._id,
-        user: ownerId,
-        role: roleDetails._id,
-      });
+      let firstMember = await MemberService.createMember(
+        community._id,
+        ownerId,
+        roleDetails._id
+      );
 
-      await community.save();
       res.status(200).json({
         status: true,
         content: {
@@ -63,7 +59,7 @@ class communityController {
         },
       });
     } catch (error) {
-      console.error(error);
+      Logger.instance.error(error);
       res.status(500).json({
         status: false,
         message: "Failed to create a community",
@@ -82,15 +78,17 @@ class communityController {
       const limit = perPage;
 
       //Communities wrt Pagination, also populated owner details
-      const allCommunities = await Community.find({}, { __v: 0 })
-        .skip(skip)
-        .limit(limit)
-        .populate({
-          path: "owner",
-          select: "_id name",
-        });
+      // const allCommunities = await Community.find({}, { __v: 0 })
+      //   .skip(skip)
+      //   .limit(limit)
+      //   .populate({
+      //     path: "owner",
+      //     select: "_id name",
+      //   });
 
-      const totalCommunities = await Community.countDocuments();
+      const allCommunities = await CommunityService.getAll(page, perPage);
+
+      const totalCommunities = await CommunityService.getAllCount();
 
       const totalPages = Math.ceil(totalCommunities / limit);
 
@@ -117,6 +115,7 @@ class communityController {
   static async getCommunityMembers(req: Request, res: Response) {
     try {
       let communityId = req.params.id;
+      Logger.instance.info(communityId);
 
       const page = parseInt(req.query.page as string) || 1;
       const perPage = 10;
@@ -126,7 +125,9 @@ class communityController {
       const limit = perPage;
 
       // Query the community to ensure it exists
-      const community = await Community.findOne({ _id: communityId });
+      const community = await CommunityService.getCommunityById(
+        new ObjectId(communityId)
+      );
       if (!community) {
         return res.status(404).json({
           status: false,
@@ -135,21 +136,28 @@ class communityController {
       }
 
       // Query members with pagination, populate other fields
-      const members = await Member.find({ community: communityId })
-        .skip(skip)
-        .limit(limit)
-        .populate({
-          path: "role",
-          select: "id name",
-        })
-        .populate({
-          path: "user",
-          select: "id name",
-        });
+      // const members = await Member.find({ community: communityId })
+      //   .skip(skip)
+      //   .limit(limit)
+      //   .populate({
+      //     path: "role",
+      //     select: "id name",
+      //   })
+      //   .populate({
+      //     path: "user",
+      //     select: "id name",
+      //   });
+      const members = await CommunityService.getCommunityMembers(
+        communityId,
+        skip,
+        limit
+      );
 
-      const totalMembers = await Member.countDocuments({
-        community: communityId,
-      });
+      Logger.instance.info(members);
+
+      const totalMembers = await MemberService.getMemberCount(
+        new ObjectId(communityId)
+      );
       const totalPages = Math.ceil(totalMembers / limit);
 
       res.status(200).json({
@@ -177,19 +185,17 @@ class communityController {
       const page = parseInt(req.query.page as string) || 1;
       const perPage = 10;
 
-      // Calculate skip and limit for pagination
-      const skip = (page - 1) * perPage;
-      const limit = perPage;
-
       // get all the communites with owner_id as loggedIn user's Id
-      const communities = await Community.find({ owner: req.user._id })
-        .skip(skip)
-        .limit(limit);
+      const communities = await CommunityService.getOwnedCommunities(
+        req.user._id,
+        page,
+        perPage
+      );
 
-      const totalCommunities = await Community.countDocuments({
-        owner: req.user._id,
-      });
-      const totalPages = Math.ceil(totalCommunities / limit);
+      const totalCommunities = await CommunityService.getOwnedCommunitiesCount(
+        req.user._id
+      );
+      const totalPages = Math.ceil(totalCommunities / perPage);
 
       res.status(200).json({
         status: true,
@@ -223,20 +229,27 @@ class communityController {
       const skip = (page - 1) * perPage;
       const limit = perPage;
 
-      const joinedCommunities = await Member.find({ user: userId })
-        .skip(skip)
-        .limit(limit)
-        .populate({
-          path: "community",
-          select: "id name slug owner created_at updated_at",
-          populate: {
-            path: "owner",
-            select: "id name",
-          },
-        })
-        .populate("role", "id name");
+      // const joinedCommunities = await Member.find({ user: userId })
+      //   .skip(skip)
+      //   .limit(limit)
+      //   .populate({
+      //     path: "community",
+      //     select: "id name slug owner created_at updated_at",
+      //     populate: {
+      //       path: "owner",
+      //       select: "id name",
+      //     },
+      //   })
+      //   .populate("role", "id name");
+      const joinedCommunities = await CommunityService.getJoinedCommunities(
+        skip,
+        limit,
+        userId
+      );
 
-      const total = await Member.countDocuments({ user: userId });
+      console.log(joinedCommunities);
+
+      const total = await MemberService.getJoinedCommunitiesCount(userId);
       const totalPages = Math.ceil(total / perPage);
 
       const transformedData = joinedCommunities.map((item: any) => ({
