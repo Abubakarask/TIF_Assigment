@@ -2,7 +2,7 @@
 This documentation provides details on the API endpoints, instructions on how to run the server locally, and examples of requests and responses.
 
 ## Usage
-1. Clone the repository:
+1. **Clone the repository**:
 ```bash
 git clone https://github.com/Abubakarask/return_journey.git
 cd return_journey
@@ -42,12 +42,12 @@ yarn dev
 ## Endpoints
 ### 1. GET /api/products
 
-#### Description: Retrieve a list of products.
-#### Example Request:
+- #### Description: Retrieve a list of products.
+- #### Example Request:
 ```bash
 curl http://localhost:3600/api/products
 ```
-#### Example Response:
+- #### Example Response:
 ```
 {
   success: true,
@@ -60,12 +60,12 @@ curl http://localhost:3600/api/products
 
 ### 2. GET /api/products/:id
 
-#### Description - Retrieve details of a specific product by ID.
-#### Example Request:
+- #### Description - Retrieve details of a specific product by ID.
+- #### Example Request:
 ```bash
 curl http://localhost:3600/api/products/1 
 ```
-#### Example Response:
+- #### Example Response:
 ```
 {
   success: true,
@@ -75,12 +75,12 @@ curl http://localhost:3600/api/products/1
 
 ### 3. POST /api/products
 
-#### Description: Create a new product.
-#### Example Request:
+- #### Description: Create a new product.
+- #### Example Request:
 ```bash
 curl -X POST -H "Content-Type: application/json" -d "{\"name\": \"New Product\", \"price\": 39.99}" http://localhost:3600/api/products
 ```
-#### Example Response:
+- #### Example Response:
 ```
 {
   success: true,
@@ -90,12 +90,12 @@ curl -X POST -H "Content-Type: application/json" -d "{\"name\": \"New Product\",
 
 ### 4. PUT /api/products/:id
 
-#### Description - Update details of a specific product by ID.
-#### Example Request:
+- #### Description - Update details of a specific product by ID.
+- #### Example Request:
 ```bash
 curl -X PUT -H "Content-Type: application/json" -d "{\"name\": \"Updated Product\", \"price\": 39.99}" http://localhost:3600/api/products/3
 ```
-#### Example Response:
+- #### Example Response:
 ```
 {
   success: true,
@@ -105,12 +105,12 @@ curl -X PUT -H "Content-Type: application/json" -d "{\"name\": \"Updated Product
 
 ### 5.DELETE /api/products/:id
 
-#### Description - Delete a product by ID.
-#### Example Request:
+- #### Description - Delete a product by ID.
+- #### Example Request:
 ```bash
 curl -X DELETE http://localhost:3600/api/products/3
 ```
-#### Example Response:
+- #### Example Response:
 ```
 {
   success: true,
@@ -118,7 +118,7 @@ curl -X DELETE http://localhost:3600/api/products/3
 };
 ```
 
-## Unit Testing
+## **Unit Testing**
 ### To run unit tests:
 ```bash
 npm test
