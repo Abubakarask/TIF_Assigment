@@ -40,7 +40,7 @@ yarn dev
 ```
 
 ## Endpoints
-1. ### GET /api/products
+### 1. GET /api/products
 
 #### Description: Retrieve a list of products.
 #### Example Request:
@@ -58,7 +58,7 @@ curl http://localhost:3600/api/products
 }
 ```
 
-2. ### GET /api/products/:id
+### 2. GET /api/products/:id
 
 #### Description - Retrieve details of a specific product by ID.
 #### Example Request:
@@ -73,7 +73,7 @@ curl http://localhost:3600/api/products/1
 };
 ```
 
-3. ### POST /api/products
+### 3. POST /api/products
 
 #### Description: Create a new product.
 #### Example Request:
@@ -88,7 +88,7 @@ curl -X POST -H "Content-Type: application/json" -d "{\"name\": \"New Product\",
 };
 ```
 
-4. ### PUT /api/products/:id
+### 4. PUT /api/products/:id
 
 #### Description - Update details of a specific product by ID.
 #### Example Request:
@@ -103,7 +103,7 @@ curl -X PUT -H "Content-Type: application/json" -d "{\"name\": \"Updated Product
 };
 ```
 
-5. ### DELETE /api/products/:id
+### 5.DELETE /api/products/:id
 
 #### Description - Delete a product by ID.
 #### Example Request:
@@ -116,4 +116,10 @@ curl -X DELETE http://localhost:3600/api/products/3
   success: true,
   content: { id: 3, name: "Updated Product", price: 39.99 },
 };
+```
+
+## Unit Testing
+### To run unit tests:
+```bash
+npm test
 ```
