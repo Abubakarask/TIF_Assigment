@@ -72,3 +72,48 @@ curl http://localhost:3600/api/products/1
   content: { id: 1, name: "Product 1", price: 19.99 },
 };
 ```
+
+3. ### POST /api/products
+
+#### Description: Create a new product.
+#### Example Request:
+```bash
+curl -X POST -H "Content-Type: application/json" -d "{\"name\": \"New Product\", \"price\": 39.99}" http://localhost:3600/api/products
+```
+#### Example Response:
+```
+{
+  success: true,
+  content: { id: 3, name: "New Product", price: 39.99 },
+};
+```
+
+4. ### PUT /api/products/:id
+
+#### Description - Update details of a specific product by ID.
+#### Example Request:
+```bash
+curl -X PUT -H "Content-Type: application/json" -d "{\"name\": \"Updated Product\", \"price\": 39.99}" http://localhost:3600/api/products/3
+```
+#### Example Response:
+```
+{
+  success: true,
+  content: { id: 3, name: "Updated Product", price: 39.99 },
+};
+```
+
+5. ### DELETE /api/products/:id
+
+#### Description - Delete a product by ID.
+#### Example Request:
+```bash
+curl -X DELETE http://localhost:3600/api/products/3
+```
+#### Example Response:
+```
+{
+  success: true,
+  content: { id: 3, name: "Updated Product", price: 39.99 },
+};
+```
