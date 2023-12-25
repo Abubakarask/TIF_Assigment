@@ -1,4 +1,4 @@
-# API Overview
+# Overview
 This documentation provides details on the API endpoints, instructions on how to run the server locally, and examples of requests and responses.
 
 ## Usage
@@ -39,4 +39,36 @@ npm run dev
 yarn dev
 ```
 
+## Endpoints
+1. ### GET /api/products
 
+#### Description: Retrieve a list of products.
+#### Example Request:
+```bash
+curl http://localhost:3600/api/products
+```
+#### Example Response:
+```
+{
+  success: true,
+  content: [
+    { id: 1, name: "Product 1", price: 19.99 },
+    { id: 2, name: "Product 2", price: 29.99 },
+  ],
+}
+```
+
+2. ### GET /api/products/:id
+
+#### Description - Retrieve details of a specific product by ID.
+#### Example Request:
+```bash
+curl http://localhost:3600/api/products/1 
+```
+#### Example Response:
+```
+{
+  success: true,
+  content: { id: 1, name: "Product 1", price: 19.99 },
+};
+```
