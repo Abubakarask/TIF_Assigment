@@ -1,15 +1,42 @@
-# TIF_Assigment
+# API Overview
+This documentation provides details on the API endpoints, instructions on how to run the server locally, and examples of requests and responses.
 
-# Steps to run the Project
+## Usage
+1. Clone the repository:
+```bash
+git clone https://github.com/Abubakarask/return_journey.git
+cd return_journey
+```
 
-## Step1 --> Get(Retrieve) Files which are in .gitignore
-### i)node_modules --> Use ```npm i``` (to install required libraries)
-### ii)config/config.env --> define a environment variables file named config.env (in config folder) with attributes:
-                          - PORT
-                          - MONGO_URI
-                          - JWT_SECRET 
+## TaskI --> Javascript Assignment
+### i) Navigate to folder Task-I
+```bash
+cd Task-I
+```
 
-## Step2 -->  After Having the Libraries and Environmental Variables the Project is good to go, 
-# Use ```npm run start``` or `nodemon server.js` to run the project.
+### ii) Run the three scripts:
+```
+node task1.js
+node task2.js
+node task3.js
+```
 
-## [POSTMAN Collection Link](https://www.postman.com/blue-equinox-349575/workspace/tif/collection/24314504-93b00d87-7260-440d-a788-a8340bb957e9?action=share&creator=24314504)
+## TaskII --> Nodejs and Typescript Assignment
+### i) Navigate to folder Task-II from folder return_journey
+```bash
+cd Task-II
+```
+
+### ii) Install and dependencies using npm or yarn
+```bash
+npm i
+yarn
+```
+
+### iii) To run the server use:
+```bash
+npm run dev
+yarn dev
+```
+
+
